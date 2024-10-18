@@ -9,7 +9,6 @@ try:
     import os
     import click
 
-    from .lib import PlatformDataProvider, ComponentStatusProvider, ComponentUpdateProvider
     from .lib import URL, SquashFs, FWPackage
     from .log import LogHelper
 except ImportError as e:
@@ -37,7 +36,6 @@ ROOT_UID = 0
 
 # ========================= Variables ==========================================
 
-pdp = PlatformDataProvider()
 log_helper = LogHelper()
 
 # ========================= Helper functions ===================================
@@ -98,6 +96,8 @@ def all_update(ctx):
 
 
 def chassis_handler(ctx):
+    from .lib import PlatformDataProvider
+    pdp = PlatformDataProvider()
     ctx.obj[CHASSIS_NAME_CTX_KEY] = pdp.chassis.get_name()
     ctx.obj[COMPONENT_PATH_CTX_KEY].append(pdp.chassis.get_name())
 
@@ -119,12 +119,16 @@ def chassis_update(ctx):
 
 
 def module_handler(ctx, module_name):
+    from .lib import PlatformDataProvider
+    pdp = PlatformDataProvider()
     ctx.obj[MODULE_NAME_CTX_KEY] = module_name
     ctx.obj[COMPONENT_PATH_CTX_KEY].append(pdp.chassis.get_name())
     ctx.obj[COMPONENT_PATH_CTX_KEY].append(module_name)
 
 
 def validate_module(ctx, param, value):
+    from .lib import PlatformDataProvider
+    pdp = PlatformDataProvider()
     if value == HELP:
         cli_show_help(ctx)
 
@@ -160,6 +164,7 @@ def component_handler(ctx, component_name):
 
 
 def validate_component(ctx, param, value):
+    pdp = PlatformDataProvider()
     if value == HELP:
         cli_show_help(ctx)
 
@@ -292,10 +297,13 @@ def fw_install(ctx, yes, fw_path):
 @click.pass_context
 def fw_update(ctx, yes, force, image):
     """Update firmware from SONiC image"""
+    from .lib import ComponentUpdateProvider
     if CHASSIS_NAME_CTX_KEY in ctx.obj:
         chassis_name = ctx.obj[CHASSIS_NAME_CTX_KEY]
         module_name = None
     elif MODULE_NAME_CTX_KEY in ctx.obj:
+        from .lib import PlatformDataProvider
+        pdp = PlatformDataProvider()
         chassis_name = pdp.chassis.get_name()
         module_name = ctx.obj[MODULE_NAME_CTX_KEY]
 
@@ -350,6 +358,7 @@ def fw_update(ctx, yes, force, image):
 @click.pass_context
 def fw_auto_update(ctx, boot, image=None, fw_image=None):
     """Update firmware from SONiC image"""
+    from .lib import ComponentUpdateProvider
     squashfs = None
     fwpackage = None
     cup = None
@@ -410,6 +419,7 @@ def show():
 @click.pass_context
 def updates(ctx, image=None, fw_image=None):
     """Show available updates"""
+    from .lib import ComponentUpdateProvider
     try:
         squashfs = None
         fwpackage = None
@@ -455,6 +465,7 @@ def updates(ctx, image=None, fw_image=None):
 def status(ctx):
     """Show platform components status"""
     try:
+        from .lib import ComponentStatusProvider
         csp = ComponentStatusProvider()
         click.echo(csp.get_status())
     except Exception as e:
@@ -467,6 +478,7 @@ def status(ctx):
 def update_all_status(ctx):
     """Show platform components update all status"""
     try:
+        from .lib import ComponentStatusProvider
         csp = ComponentStatusProvider()
         click.echo(csp.get_au_status())
     except Exception as e:

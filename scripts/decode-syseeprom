@@ -10,7 +10,7 @@
 #
 # This is the main script that handles eeprom encoding and decoding
 #
-import optparse
+import argparse
 import os
 import re
 import sys
@@ -210,14 +210,14 @@ def print_model(use_db=False):
 # sets global variable "optcfg"
 #
 def get_cmdline_opts():
-    optcfg = optparse.OptionParser(usage='usage: {} [-s][-m]'.format(sys.argv[0]))
-    optcfg.add_option('-d', dest='db', action='store_true',
+    optcfg = argparse.ArgumentParser(usage='usage: {} [-s][-m]'.format(sys.argv[0]))
+    optcfg.add_argument('-d', dest='db', action='store_true',
                       default=False, help='print eeprom from database')
-    optcfg.add_option('-s', dest='serial', action='store_true',
+    optcfg.add_argument('-s', dest='serial', action='store_true',
                       default=False, help='print device serial number/service tag')
-    optcfg.add_option('-p', dest='modelstr', action='store_true', default=False,
+    optcfg.add_argument('-p', dest='modelstr', action='store_true', default=False,
                       help='print the device product name')
-    optcfg.add_option('-m', dest='mgmtmac', action='store_true', default=False,
+    optcfg.add_argument('-m', dest='mgmtmac', action='store_true', default=False,
                       help='print the base mac address for management interfaces')
     return optcfg.parse_args()
 
@@ -228,7 +228,7 @@ def main():
         print('Root privileges are required for this operation')
         return 1
 
-    (opts, args) = get_cmdline_opts()
+    opts = get_cmdline_opts()
 
     # Get platform name
     platform = device_info.get_platform()

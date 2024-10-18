@@ -21,7 +21,7 @@ try:
     from sonic_py_common import device_info
     from tabulate import tabulate
 
-    from . import Platform
+    from sonic_platform.platform import Platform
     from .log import LogHelper
     from sonic_py_common.general import check_output_pipe
 except ImportError as e:
