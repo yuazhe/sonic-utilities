@@ -2395,6 +2395,7 @@ main() {
 
     save_cmd "docker ps -a" "docker.ps" &
     save_cmd "docker top pmon" "docker.pmon" &
+    save_cmd "docker logs pmon" "docker.pmon.logs" &
 
     if [[ -d ${PLUGINS_DIR} ]]; then
         local -r dump_plugins="$(find ${PLUGINS_DIR} -type f -executable)"
