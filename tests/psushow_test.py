@@ -95,10 +95,9 @@ PSU 2  0J6J4K   CN-0J6J4K-17972-5AF-008M-A00  A                 12.18          1
             captured = capsys.readouterr()
             assert captured.out == expected_output
 
-        # Test trying to display a non-existent PSU
+        # Test trying to display a non-existent PSU (no "PSU not detected" per HLD)
         expected_output = '''\
 Error: PSU 3 is not available. Number of supported PSUs: 2
-PSU not detected
 '''
         for arg in ['-s', '--status']:
             with mock.patch('sys.argv', ['psushow', arg, '-i', '3']):
@@ -193,10 +192,9 @@ PSU not detected
             captured = capsys.readouterr()
             assert captured.out == expected_output
 
-        # Test trying to display a non-existent PSU
+        # Test trying to display a non-existent PSU (no "PSU not detected" per HLD)
         expected_output = '''\
 Error: PSU 3 is not available. Number of supported PSUs: 2
-PSU not detected
 '''
         for arg in ['-j', '--json']:
             with mock.patch('sys.argv', ['psushow', '-s', '-i', '3', arg]):
@@ -204,6 +202,27 @@ PSU not detected
             assert ret == 1
             captured = capsys.readouterr()
             assert captured.out == expected_output
+
+    def test_status_table_empty_no_error(self, capsys):
+        """HLD: when no PSU/PDB, output is simply header and no rows (no 'PSU not detected' error)."""
+        with mock.patch.object(psushow, 'get_psu_status_list', return_value=[]):
+            with mock.patch('sys.argv', ['psushow', '-s']):
+                ret = psushow.main()
+        assert ret == 0
+        captured = capsys.readouterr()
+        # Header only, no data rows, no error message
+        assert 'PSU ' in captured.out and 'Model' in captured.out
+        assert 'PSU not detected' not in captured.out
+
+    def test_status_json_empty_no_error(self, capsys):
+        """When no PSU/PDB, JSON output is [] and no error."""
+        with mock.patch.object(psushow, 'get_psu_status_list', return_value=[]):
+            with mock.patch('sys.argv', ['psushow', '-s', '-j']):
+                ret = psushow.main()
+        assert ret == 0
+        captured = capsys.readouterr()
+        assert captured.out.strip() == '[]'
+        assert 'PSU not detected' not in captured.out
 
     def test_version(self, capsys):
         for arg in ['-v', '--version']:
